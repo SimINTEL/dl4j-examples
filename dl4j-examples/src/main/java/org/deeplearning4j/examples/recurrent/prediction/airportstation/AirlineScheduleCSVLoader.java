@@ -66,7 +66,7 @@ public class AirlineScheduleCSVLoader {
                 }
             }
 
-            File file = new File("D:/projects/AI/dl4j-examples-master/dl4j-examples/src/main/resources/airport/FlightAggregate.csv");
+            File file = new File("D:/projects/AI/dl4j-examples/dl4j-examples/src/main/resources/airport/FlightAggregate.csv");
             FileOutputStream out = new FileOutputStream(file, true);
             OutputStreamWriter osw = new OutputStreamWriter(out, "UTF8");
             BufferedWriter bw = new BufferedWriter(osw);

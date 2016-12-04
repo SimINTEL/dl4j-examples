@@ -52,7 +52,7 @@ public class WIFIPassengerCSVLoader {
 
             }
 
-            File file = new File("D:/projects/AI/dl4j-examples-master/dl4j-examples/src/main/resources/airport/WIFIAggregate.csv");
+            File file = new File("D:/projects/AI/dl4j-examples/dl4j-examples/src/main/resources/airport/WIFIAggregate.csv");
             FileOutputStream out = new FileOutputStream(file, true);
             OutputStreamWriter osw = new OutputStreamWriter(out, "UTF8");
             BufferedWriter bw = new BufferedWriter(osw);

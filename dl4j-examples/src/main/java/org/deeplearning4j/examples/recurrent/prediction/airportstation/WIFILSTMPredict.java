@@ -68,9 +68,21 @@ public class WIFILSTMPredict {
             INDArray initArray = getInitArray(iterator);
 
             System.out.println("预测结果：");
-            for(int j=0;j<20;j++) {
+
+            for(int j=0;j<200;j++) {
                 INDArray output = net.rnnTimeStep(initArray);
-                System.out.print(output.getDouble(0)*iterator.getMaxArr()[1]+" ");
+                StringBuilder builder = new StringBuilder();
+                /*builder.append(output.getDouble(0)*iterator.getMaxArr()[0]
+//                    +","
+//                    + output.getDouble(1)*iterator.getMaxArr()[1] + ","
+//                    + output.getDouble(2)*iterator.getMaxArr()[2] + ","
+//                    + output.getDouble(3)*iterator.getMaxArr()[3] + ","
+//                    + output.getDouble(4)*iterator.getMaxArr()[4]
+                );*/
+
+                builder.append(output.getDouble(0));
+                builder.append("\n");
+                System.out.print(builder.toString());
             }
             System.out.println();
             net.rnnClearPreviousState();
@@ -80,18 +92,18 @@ public class WIFILSTMPredict {
     private static INDArray getInitArray(WIFIDataIterator iter){
         double[] maxNums = iter.getMaxArr();
         INDArray initArray = Nd4j.zeros(1, 5, 1);
-        initArray.putScalar(new int[]{0,0,0}, 28/maxNums[0]);
-        initArray.putScalar(new int[]{0,1,0}, 4187/maxNums[1]);
-        initArray.putScalar(new int[]{0,2,0}, 103/maxNums[2]);
-        initArray.putScalar(new int[]{0,3,0}, 2/maxNums[3]);
-        initArray.putScalar(new int[]{0,4,0}, 8/maxNums[4]);
+        initArray.putScalar(new int[]{0,0,0}, 0/maxNums[0]);
+        initArray.putScalar(new int[]{0,1,0}, 282/maxNums[1]);
+        initArray.putScalar(new int[]{0,2,0}, 44/maxNums[2]);
+        initArray.putScalar(new int[]{0,3,0}, 0/maxNums[3]);
+        initArray.putScalar(new int[]{0,4,0}, 1/maxNums[4]);
         return initArray;
     }
 
     public static void main(String[] args) {
-        String inputFile = WIFILSTMPredict.class.getClassLoader().getResource("airport/wifi/WIFIGateE1-1A-1E1-1-01.csv").getPath();
-        int batchSize = 1;
-        int exampleLength = 30;
+        String inputFile = WIFILSTMPredict.class.getClassLoader().getResource("airport/WIFIGateE1-1A-1E1-1-01.csv").getPath();
+        int batchSize = 3;
+        int exampleLength = 143;
         //初始化深度神经网络
         WIFIDataIterator iterator = new WIFIDataIterator();
         iterator.loadData(inputFile,batchSize,exampleLength);

@@ -1,3 +1,4 @@
+airport/
 target/
 .idea/*
 *.iml
@@ -40,4 +41,5 @@ metastore_db
 Word2vec-index/
 *.conf
 *.json
+
 

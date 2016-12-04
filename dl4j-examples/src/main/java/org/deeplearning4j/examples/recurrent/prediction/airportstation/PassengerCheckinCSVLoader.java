@@ -55,7 +55,7 @@ public class PassengerCheckinCSVLoader {
                 }
             }
 
-            File file = new File("D:/projects/AI/dl4j-examples-master/dl4j-examples/src/main/resources/airport/CheckinAggregate.csv");
+            File file = new File("D:/projects/AI/dl4j-examples/dl4j-examples/src/main/resources/airport/CheckinAggregate.csv");
             FileOutputStream out = new FileOutputStream(file, true);
             OutputStreamWriter osw = new OutputStreamWriter(out, "UTF8");
             BufferedWriter bw = new BufferedWriter(osw);
