@@ -17,18 +17,23 @@ import java.util.*;
 public class MinutePassengerSecurityCheckCSVLoader {
     private static Logger log = LoggerFactory.getLogger(MinutePassengerSecurityCheckCSVLoader.class);
     private static Map<String, Integer> result = new HashMap<String, Integer>();
+    private static Map<String, String> gateAreaMap = new HashMap<String, String>();
+    private static Map<String, Map<String, String>> flightGateMap = new HashMap<String, Map<String, String>>();
 
     public static void main(String[] args) {
         try{
-            List<String> lines = IOUtils.readLines(new ClassPathResource("/airport/airport_gz_security_check_chusai_1stround.csv").getInputStream());
+            gateAreaMap = Utils.getGateAreaMap();
+            flightGateMap = Utils.getFlightGateMap();
 
-            String startString = "2016-09-10 18:50:00";
-            String endString = "2016-09-14 14:50:00";
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            //fixed start time and end time
+            String startString = "2016/09/10 18:50:00";
+            String endString = "2016/09/14 14:50:00";
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd hh:mm");
             Date startDate = sdf.parse(startString);
             Date endDate = sdf.parse(endString);
-
-            Calendar cal = Calendar.getInstance();
+            SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/MM/dd hh:mm");
+            //read security passenger data, aggregate passenger amount for the same gate
+            List<String> lines = IOUtils.readLines(new ClassPathResource("/airport/airport_gz_security_check_chusai_1stround.csv").getInputStream());
             int linenumber = 0;
             for(String line : lines) {
                 linenumber++;
@@ -37,14 +42,37 @@ public class MinutePassengerSecurityCheckCSVLoader {
 
                 String[] parts = line.split(",");
                 Date securityTime = sdf.parse(parts[1].toString());
-                log.info(securityTime.toString());
+                //log.info(securityTime.toString());
                 //only handle the time inside wifi time coverage
                 if(!securityTime.after(endDate) && !securityTime.before(startDate)){
-                    cal.setTime(securityTime);
-                    int iminute = cal.get(Calendar.MINUTE);
-                    log.info("minute=" + iminute);
-                    String key = parts[1].toString().substring(0,10) + " " + cal.get(Calendar.HOUR_OF_DAY)+":"+iminute;
-                    log.info("key="+key);
+                    String flightID = parts[2];
+                    String time = parts[1];
+                    String gateName="";
+
+                    if(flightGateMap.get(flightID) != null){
+                        Map<String, String> values = flightGateMap.get(flightID);
+                        if(values.keySet().contains(time)){
+                            gateName = values.get(time);
+                        }
+                        else{
+                            for(String key : values.keySet()){
+                                Date scheduleTime = sdf2.parse(key);
+                                Date flightTime = sdf2.parse(time);
+                                if(Math.abs(scheduleTime.getTime() - flightTime.getTime())/(1000*60*60) < 23){
+                                    gateName = values.get(key);
+                                }
+                            }
+                        }
+                    }
+
+                    //log.info("gate="+gateName);
+                    String areaName = gateAreaMap.get(gateName);
+                    if(areaName == null){
+                        log.info("flightID=" + flightID + ", time=" + time);
+                    }
+
+                    String key = areaName + "%" + time;
+                    //log.info("key="+key);
 
                     if(result.keySet().contains(key)){
                         result.put(key, result.get(key) + 1);
@@ -62,9 +90,10 @@ public class MinutePassengerSecurityCheckCSVLoader {
 
             result.forEach((k,v) -> {
                 try {
+                    String[] keys = k.split("%");
                     bw.newLine();
-                    String date = k + ":00";
-                    String line = date + "," + v;
+                    String date = keys[1] + ":00";
+                    String line = date + "," + v + "," + keys[0];
                     bw.write(line);
                 }
                 catch(IOException e){
@@ -76,9 +105,6 @@ public class MinutePassengerSecurityCheckCSVLoader {
             osw.close();
             out.close();
 
-        }
-        catch(ParseException e){
-            log.error("data parse error", e);
         }
         catch (Exception e){
             log.error("error when generate xls file", e);

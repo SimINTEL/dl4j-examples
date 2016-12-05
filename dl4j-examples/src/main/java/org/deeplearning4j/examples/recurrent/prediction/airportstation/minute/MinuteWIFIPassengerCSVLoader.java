@@ -21,13 +21,7 @@ public class MinuteWIFIPassengerCSVLoader {
     public static void main(String[] args){
         try{
             List<String> lines = IOUtils.readLines(new ClassPathResource("/airport/WIFI_AP_Passenger_Records_chusai_1stround.csv").getInputStream());
-            //we don't want the loop to be asynchronous since we will aggregate the passenger count. so we will choose the traditional way of loop
-            /*lines.forEach(item -> {
-                String[] parts = item.split(",");
-            });*/
-
             for(String line : lines) {
-
                 String[] parts = line.split(",");
                 String [] times =  parts[2].toString().split("-");
 
@@ -63,7 +57,7 @@ public class MinuteWIFIPassengerCSVLoader {
                     String [] array = k.split("%");
                     String [] dateStrings = array[1].toString().split("-");
                     String date = dateStrings[0] + "-" + dateStrings[1] + "-" + dateStrings[2] + " " + dateStrings[3] + ":" + dateStrings[4] + ":00";
-                    String line = array[0] + "," + date + "," + v;
+                    String line = array[0] + "," + date + "," + v + "," + array[0].substring(0,2);
                     bw.write(line);
 
                 }

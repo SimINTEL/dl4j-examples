@@ -22,60 +22,14 @@ public class MinutePassengerCheckinCSVLoader {
 
     public static void main(String[] args) {
         try{
-            List<String> gateAreaList = IOUtils.readLines(new ClassPathResource("/airport/airport_gz_gates.csv").getInputStream());
-            int i = 0;
-            for(String gateArea : gateAreaList) {
-                i++;
-                if(i == 1)
-                    continue;
-
-                String[] parts = gateArea.split(",");
-                gateAreaMap.put(parts[0], parts[1]);
-            }
-            log.info("gateAreaMap" + gateAreaMap.toString());
-
+            gateAreaMap = Utils.getGateAreaMap();
+            flightGateMap = Utils.getFlightGateMap();
             //fixed start time and end time
             String startString = "2016/09/10 18:50:00";
             String endString = "2016/09/14 14:50:00";
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd hh:mm");
             Date startDate = sdf.parse(startString);
             Date endDate = sdf.parse(endString);
-
-            //load airport_gz_flights_chusai_1stround to get the gate of flight of a certain time
-            List<String> flighSchedule = IOUtils.readLines(new ClassPathResource("/airport/airport_gz_flights_chusai_1stround.csv").getInputStream());
-            int j = 0;
-            for(String line : flighSchedule) {
-                j++;
-                if (j == 1)
-                    continue;
-
-                String[] parts = line.split(",");
-                //no gate information for this flight, skip it
-                if(parts.length < 4)
-                    continue;
-
-                String time = parts[2].toString();
-                String flightID = parts[0];
-                String bgateID = "";
-                if(parts.length > 4){
-                    bgateID =parts[4].replace("\"","");
-                }
-                else{
-                    bgateID =parts[3];
-                }
-                //log.info("key="+key);
-                if(flightGateMap.keySet().contains(flightID)){
-                    Map<String, String> values = flightGateMap.get(flightID);
-                    values.put(time, bgateID);
-                }
-                else{
-                    Map<String, String> values = new HashMap<>();
-                    values.put(time,bgateID);
-                    flightGateMap.put(flightID, values);
-                }
-            }
-            log.info("flightGateMap" + flightGateMap.toString());
-
             SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/MM/dd hh");
             //read check in data, aggregate passenger amount for the same gate
             List<String> lines = IOUtils.readLines(new ClassPathResource("/airport/airport_gz_departure_chusai_1stround.csv").getInputStream());
@@ -96,7 +50,7 @@ public class MinutePassengerCheckinCSVLoader {
                 if(!checkinTime.after(endDate) && !checkinTime.before(startDate)){
                     String flightID = parts[1];
                     String time = parts[2];
-                    //if the flight time in checkin table within 1 hour difference with schedule time in flight table, and the flight ID is the same, we consider them same one.
+                    //if the flight time in checkin table within 23 hour difference with schedule time in flight table, and the flight ID is the same, we consider them same one.
                     String gateName="";
                     if(flightGateMap.get(flightID) != null){
                         Map<String, String> values = flightGateMap.get(flightID);
@@ -154,9 +108,6 @@ public class MinutePassengerCheckinCSVLoader {
             osw.close();
             out.close();
 
-        }
-        catch(ParseException e){
-            log.error("data parse error", e);
         }
         catch (Exception e){
             log.error("error when generate xls file", e);

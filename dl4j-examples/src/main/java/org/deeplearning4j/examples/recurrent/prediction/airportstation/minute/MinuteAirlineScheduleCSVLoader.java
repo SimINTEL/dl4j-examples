@@ -22,17 +22,7 @@ public class MinuteAirlineScheduleCSVLoader {
 
     public static void main(String[] args) {
         try{
-            List<String> gateAreaList = IOUtils.readLines(new ClassPathResource("/airport/airport_gz_gates.csv").getInputStream());
-            int i = 0;
-            for(String gateArea : gateAreaList) {
-                i++;
-                if(i == 1)
-                    continue;
-
-                String[] parts = gateArea.split(",");
-                gateAreaMap.put(parts[0], parts[1]);
-            }
-            log.info("gateAreaMap" + gateAreaMap.toString());
+            gateAreaMap = Utils.getGateAreaMap();
 
             List<String> lines = IOUtils.readLines(new ClassPathResource("/airport/airport_gz_flights_chusai_1stround.csv").getInputStream());
             String startString = "2016/09/10 18:50";
@@ -49,25 +39,31 @@ public class MinuteAirlineScheduleCSVLoader {
                     continue;
 
                 String[] parts = line.split(",");
-                log.info(parts[4]);
-                Date checkinTime =  null;
-                try{
-                    checkinTime = sdf.parse(parts[4].toString());
-                    log.info(checkinTime.toString());
-                }
-                catch(ParseException e){
-                    checkinTime = sdf.parse(parts[5].toString());
+                //no gate information for this flight, skip it
+                if (parts.length < 4)
+                    continue;
+
+                String bgateID = "";
+                if (parts.length > 4) {
+                    bgateID = parts[4].replace("\"", "");
+                } else {
+                    bgateID = parts[3];
                 }
 
+                Date flightTime =  sdf.parse(parts[2].toString());;
+
                 //only handle the time inside wifi time coverage
-                if(checkinTime != null && !checkinTime.after(endDate) && !checkinTime.before(startDate)){
-                    cal.setTime(checkinTime);
+                if(flightTime != null && !flightTime.after(endDate) && !flightTime.before(startDate)){
+                    cal.setTime(flightTime);
                     int iminute = cal.get(Calendar.MINUTE);
-                    log.info("minute=" + iminute);
-                    String dateHeader = sdf.format(checkinTime);
+                    //log.info("minute=" + iminute);
+                    String dateHeader = sdf.format(flightTime);
                     String time = dateHeader.substring(0,10) + " " + cal.get(Calendar.HOUR_OF_DAY)+":"+iminute;
-                    String gate = gateAreaMap.get(parts[3]);
-                    log.info("key="+gate + "%" +time);
+                    String gate = gateAreaMap.get(bgateID);
+                    if(gate == null){
+                        log.info("bgateID=" + bgateID+ ", time=" + time);
+                    }
+                    //log.info("key="+gate + "%" +time);
                     String mapkey = gate + "%" +time;
                     if(result.keySet().contains(mapkey)){
                         result.put(mapkey, result.get(mapkey) + 1);
@@ -101,9 +97,6 @@ public class MinuteAirlineScheduleCSVLoader {
             osw.close();
             out.close();
 
-        }
-        catch(ParseException e){
-            log.error("data parse error", e);
         }
         catch (Exception e){
             log.error("error when generate xls file", e);
