@@ -21,12 +21,12 @@ public class MinuteSeparateWIFIPassengerCSVLoader {
 
     public static void main(String[] args) {
         try{
-            List<String> lines = IOUtils.readLines(new ClassPathResource("/airport/wifiMinute/MinuteWIFIAggregate.csv").getInputStream());
+            List<String> lines = IOUtils.readLines(new ClassPathResource("/airport/wifiMinute/MinuteGateWIFIPassenger.csv").getInputStream());
 
             for(String line : lines) {
                 String[] parts = line.split(",");
                 String key = parts[0];
-                String value = parts[1] + "," + parts[2];
+                String value = parts[1] + "," + parts[2] + "," + parts[3] + "," + parts[4] +","+ parts[5] + "," + parts[6] + "," +parts[7];
                 if(result.keySet().contains(key)){
                     result.get(key).add(value);
                 }

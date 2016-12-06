@@ -146,21 +146,21 @@ public class WIFIDataIterator implements DataSetIterator {
                 nextData = dataList.get(j+1);
                 //构造训练向量
                 int c = endIndex-j-1;
-                /*input.putScalar(new int[]{i, 0, c}, curData.getPassengerCount()/maxNum[0]);
+                input.putScalar(new int[]{i, 0, c}, curData.getPassengerCount()/maxNum[0]);
                 input.putScalar(new int[]{i, 1, c}, curData.getGatePassengerCount()/maxNum[1]);
                 input.putScalar(new int[]{i, 2, c}, curData.getCheckinCount()/maxNum[2]);
                 input.putScalar(new int[]{i, 3, c}, curData.getSecurityCount()/maxNum[3]);
-                input.putScalar(new int[]{i, 4, c}, curData.getFlightCount()/maxNum[4]);*/
+                input.putScalar(new int[]{i, 4, c}, curData.getFlightCount()/maxNum[4]);
 
-                input.putScalar(new int[]{i, 0, c}, curData.getPassengerCount());
+                /*input.putScalar(new int[]{i, 0, c}, curData.getPassengerCount());
                 input.putScalar(new int[]{i, 1, c}, curData.getGatePassengerCount());
                 input.putScalar(new int[]{i, 2, c}, curData.getCheckinCount());
                 input.putScalar(new int[]{i, 3, c}, curData.getSecurityCount());
-                input.putScalar(new int[]{i, 4, c}, curData.getFlightCount());
+                input.putScalar(new int[]{i, 4, c}, curData.getFlightCount());*/
 
                 //构造label向量
-                /*label.putScalar(new int[]{i, 0, c}, nextData.getPassengerCount()/maxNum[0]);*/
-                label.putScalar(new int[]{i, 0, c}, nextData.getPassengerCount());
+                label.putScalar(new int[]{i, 0, c}, nextData.getPassengerCount()/maxNum[0]);
+                //label.putScalar(new int[]{i, 0, c}, nextData.getPassengerCount());
 //                label.putScalar(new int[]{i, 1, c}, curData.getGatePassengerCount()/maxNum[1]);
 //                label.putScalar(new int[]{i, 2, c}, curData.getCheckinCount()/maxNum[2]);
 //                label.putScalar(new int[]{i, 3, c}, curData.getSecurityCount()/maxNum[3]);
@@ -170,11 +170,11 @@ public class WIFIDataIterator implements DataSetIterator {
 
             }
 
-            //loop to the end of the data, exit the loop.
+            /*//loop to the end of the data, exit the loop.
             if(endIndex==dataList.size()-1){
                 dataRecord.remove(0);
                 break;
-            }
+            }*/
         }
 
         return new DataSet(input, label);

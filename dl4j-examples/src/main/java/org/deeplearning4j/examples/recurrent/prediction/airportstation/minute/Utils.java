@@ -30,12 +30,12 @@ public class Utils {
         Map<String, Map<String, Integer>> flightAgreegateMap = new HashMap<String, Map<String, Integer>>();
 
         try{
-            List<String> flighAggregate = IOUtils.readLines(new ClassPathResource("/airport/MinuteFlightAggregate.csv").getInputStream());
+            List<String> flighAggregate = IOUtils.readLines(new ClassPathResource("/airport/wifiMinute/MinuteFlightAggregate.csv").getInputStream());
             for(String line : flighAggregate){
                 String[] parts = line.split(",");
-                String time =parts[0];
-                int passengerAmount = Integer.parseInt(parts[1]);
-                String gate = parts[2];
+                String time =parts[1];
+                int passengerAmount = Integer.parseInt(parts[2]);
+                String gate = parts[0];
 
                 if (flightAgreegateMap.keySet().contains(gate)) {
                     Map<String, Integer> values = flightAgreegateMap.get(gate);
@@ -62,6 +62,28 @@ public class Utils {
                 String[] parts = line.split(",");
                 String key = parts[2] + "%" + parts[0];
                 int passengerAmount = Integer.parseInt(parts[1].toString());
+                if (checkinPassenger.keySet().contains(key)) {
+                    checkinPassenger.put(key, checkinPassenger.get(key) + passengerAmount);
+                } else {
+                    checkinPassenger.put(key, passengerAmount);
+                }
+            }
+        }
+        catch (IOException e){
+            log.error("error when generate getMinutePassengerMap", e);
+        }
+
+        return checkinPassenger;
+    }
+
+    public static  Map<String, Integer> getMinuteFlightAgreeate(String fileName) {
+        Map<String, Integer> checkinPassenger = new HashMap<String, Integer>();
+        try {
+            List<String> lines = IOUtils.readLines(new ClassPathResource(fileName).getInputStream());
+            for (String line : lines) {
+                String[] parts = line.split(",");
+                String key = parts[0] + "%" + parts[1];
+                int passengerAmount = Integer.parseInt(parts[2].toString());
                 if (checkinPassenger.keySet().contains(key)) {
                     checkinPassenger.put(key, checkinPassenger.get(key) + passengerAmount);
                 } else {

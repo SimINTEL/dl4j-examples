@@ -32,6 +32,7 @@ public class MinutePassengerSecurityCheckCSVLoader {
             Date startDate = sdf.parse(startString);
             Date endDate = sdf.parse(endString);
             SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/MM/dd hh:mm");
+            Calendar cal = Calendar.getInstance();
             //read security passenger data, aggregate passenger amount for the same gate
             List<String> lines = IOUtils.readLines(new ClassPathResource("/airport/airport_gz_security_check_chusai_1stround.csv").getInputStream());
             int linenumber = 0;
@@ -70,15 +71,22 @@ public class MinutePassengerSecurityCheckCSVLoader {
                     if(areaName == null){
                         log.info("flightID=" + flightID + ", time=" + time);
                     }
+                    else {
+                        Date chkTimeDate =  sdf.parse(time);
+                        cal.setTime(chkTimeDate);
+                        Double dminute = Math.floor(cal.get(Calendar.MINUTE)/10);
+                        int iminute = dminute.intValue();
+                        String dateHeader = sdf.format(chkTimeDate);
+                        String chkTimeStr = dateHeader.substring(0,13) +":"+iminute;
 
-                    String key = areaName + "%" + time;
-                    //log.info("key="+key);
-
-                    if(result.keySet().contains(key)){
-                        result.put(key, result.get(key) + 1);
-                    }
-                    else{
-                        result.put(key, 1);
+                        String key = areaName + "%" + chkTimeStr;
+                        //log.info("key="+key);
+                        if(result.keySet().contains(key)){
+                            result.put(key, result.get(key) + 1);
+                        }
+                        else{
+                            result.put(key, 1);
+                        }
                     }
                 }
             }
@@ -92,7 +100,7 @@ public class MinutePassengerSecurityCheckCSVLoader {
                 try {
                     String[] keys = k.split("%");
                     bw.newLine();
-                    String date = keys[1] + ":00";
+                    String date = keys[1] + "0:00";
                     String line = date + "," + v + "," + keys[0];
                     bw.write(line);
                 }

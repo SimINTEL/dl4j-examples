@@ -20,6 +20,7 @@ public class MinuteAirlineScheduleCSVLoader {
     private static Map<String, Integer> result = new HashMap<String, Integer>();
     private static Map<String, String> gateAreaMap = new HashMap<String, String>();
 
+    //aggregate flight number every 10 minutes
     public static void main(String[] args) {
         try{
             gateAreaMap = Utils.getGateAreaMap();
@@ -50,27 +51,31 @@ public class MinuteAirlineScheduleCSVLoader {
                     bgateID = parts[3];
                 }
 
-                Date flightTime =  sdf.parse(parts[2].toString());;
+                Date flightTime =  sdf.parse(parts[2].toString());
 
                 //only handle the time inside wifi time coverage
                 if(flightTime != null && !flightTime.after(endDate) && !flightTime.before(startDate)){
                     cal.setTime(flightTime);
-                    int iminute = cal.get(Calendar.MINUTE);
+                    Double dminute = Math.floor(cal.get(Calendar.MINUTE)/10);
+                    int iminute = dminute.intValue();
                     //log.info("minute=" + iminute);
                     String dateHeader = sdf.format(flightTime);
-                    String time = dateHeader.substring(0,10) + " " + cal.get(Calendar.HOUR_OF_DAY)+":"+iminute;
+                    String time = dateHeader.substring(0,13) +":"+iminute;
                     String gate = gateAreaMap.get(bgateID);
                     if(gate == null){
                         log.info("bgateID=" + bgateID+ ", time=" + time);
                     }
-                    //log.info("key="+gate + "%" +time);
-                    String mapkey = gate + "%" +time;
-                    if(result.keySet().contains(mapkey)){
-                        result.put(mapkey, result.get(mapkey) + 1);
-                    }
                     else{
-                        result.put(mapkey, 1);
+                        //log.info("key="+gate + "%" +time);
+                        String mapkey = gate + "%" +time;
+                        if(result.keySet().contains(mapkey)){
+                            result.put(mapkey, result.get(mapkey) + 1);
+                        }
+                        else{
+                            result.put(mapkey, 1);
+                        }
                     }
+
                 }
             }
 
@@ -84,7 +89,7 @@ public class MinuteAirlineScheduleCSVLoader {
                     log.info("Mapkey="+ k);
                     bw.newLine();
                     String [] keys =  k.split("%");
-                    String date = keys[1] + ":00";
+                    String date = keys[1] + "0:00";
                     String line = keys[0] + ","+date + "," + v;
                     bw.write(line);
                 }
